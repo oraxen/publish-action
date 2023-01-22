@@ -8,6 +8,10 @@ inputs:
     description: 'The path to publish to GitHub Pages'
     required: false
     default: ''
+  dokka:
+    description: 'The type of dokka build to run'
+    required: false
+    default: ''
   release-files:
     description: 'The files to attach to the release'
     required: false
@@ -34,8 +38,13 @@ runs:
     - name: Run gradle build and publish
       shell: bash
       run: >
-        gradle build publish dokkaHtmlMultiModule
+        gradle build publish
         -PmineinabyssMavenUsername=${{ secrets.MAVEN_PUBLISH_USERNAME }} -PmineinabyssMavenPassword=${{ secrets.MAVEN_PUBLISH_PASSWORD }}
+
+    - name: Build with dokka
+      shell: bash
+      run: gradle ${{dokka}}
+      if: ${{dokka != ''}}
 
     - name: Get version from gradle
       shell: bash
