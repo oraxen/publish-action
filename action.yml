@@ -1,0 +1,61 @@
+name: 'Hello World'
+description: 'Greet someone'
+inputs:
+  maven-metadata-url:
+    description: 'The URL to the maven-metadata.xml file to get latest version from'
+    required: true
+  pages-path:
+    description: 'The path to publish to GitHub Pages'
+    required: false
+    default: ''
+  release-files:
+    description: 'The files to attach to the release'
+    required: false
+    default: ''
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 17
+        cache: gradle
+
+    - name: Set env variable for latest maven version
+      shell: bash
+      run: >
+        echo "RELEASE_VERSION=$( \
+          curl ${{maven-metadata-url}} | \
+          grep -oP '(?!<latest>)[\d\.]*(?=</latest>)' \
+        )" >> $GITHUB_ENV
+
+    - name: Run gradle build and publish
+      shell: bash
+      run: >
+        gradle build publish dokkaHtmlMultiModule
+        -PmineinabyssMavenUsername=${{ secrets.MAVEN_PUBLISH_USERNAME }} -PmineinabyssMavenPassword=${{ secrets.MAVEN_PUBLISH_PASSWORD }}
+
+    - name: Get version from gradle
+      shell: bash
+      id: extract_version
+      run: |
+        version=`gradle properties --console=plain -q | grep "^version:" | awk '{printf $2}'`
+        echo "::set-output name=version::$version"
+      if: ${{ inputs.release-files != '' }}
+
+    - name: Create GitHub Release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        automatic_release_tag: v${{ steps.extract_version.outputs.version }}
+        files: ${{release-files}}
+      if: ${{ inputs.release-files != '' }}
+
+    - name: Upload github pages artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: ${{inputs.pages-path}}
+      if: ${{ inputs.pages-files != '' }}
