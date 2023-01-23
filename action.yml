@@ -16,6 +16,12 @@ inputs:
     description: 'The files to attach to the release'
     required: false
     default: ''
+  maven-username:
+    description: 'The username of the repository to publish to'
+    required: true
+  maven-password:
+    description: 'The password of the repository to publish to'
+    required: true
 
 runs:
   using: "composite"
@@ -31,7 +37,7 @@ runs:
       shell: bash
       run: >
         echo "RELEASE_VERSION=$( \
-          curl ${{maven-metadata-url}} | \
+          curl ${{ inputs.maven-metadata-url }} | \
           grep -oP '(?!<latest>)[\d\.]*(?=</latest>)' \
         )" >> $GITHUB_ENV
 
@@ -39,12 +45,12 @@ runs:
       shell: bash
       run: >
         gradle build publish
-        -PmineinabyssMavenUsername=${{ secrets.MAVEN_PUBLISH_USERNAME }} -PmineinabyssMavenPassword=${{ secrets.MAVEN_PUBLISH_PASSWORD }}
+        -PmineinabyssMavenUsername=${{ inputs.maven-username }} -PmineinabyssMavenPassword=${{ inputs.maven-password }}
 
     - name: Build with dokka
       shell: bash
-      run: gradle ${{dokka}}
-      if: ${{dokka != ''}}
+      run: gradle ${{ inputs.dokka }}
+      if: ${{ inputs.dokka != ''}}
 
     - name: Get version from gradle
       shell: bash
@@ -60,11 +66,11 @@ runs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         automatic_release_tag: v${{ steps.extract_version.outputs.version }}
-        files: ${{release-files}}
+        files: ${{ inputs.release-files }}
       if: ${{ inputs.release-files != '' }}
 
     - name: Upload github pages artifact
       uses: actions/upload-pages-artifact@v1
       with:
-        path: ${{inputs.pages-path}}
+        path: ${{ inputs.pages-path }}
       if: ${{ inputs.pages-files != '' }}
