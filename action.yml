@@ -1,5 +1,5 @@
-name: 'Hello World'
-description: 'Greet someone'
+name: 'Publish MineInAbyss packages'
+description: 'Publishes to our maven repo, documentation, and release jars'
 inputs:
   maven-metadata-url:
     description: 'The URL to the maven-metadata.xml file to get latest version from'
