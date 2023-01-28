@@ -53,20 +53,12 @@ runs:
       run: gradle ${{ inputs.dokka }} -Dorg.gradle.jvmargs=-XX:MaxMetaspaceSize=512m
       if: ${{ inputs.dokka != ''}}
 
-    - name: Get version from gradle
-      shell: bash
-      id: extract_version
-      run: |
-        version=`gradle properties --console=plain -q | grep "^version:" | awk '{printf $2}'`
-        echo "::set-output name=version::$version"
-      if: ${{ inputs.release-files != '' }}
-
     - name: Create GitHub Release
       uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: "${{ github.token }}"
         prerelease: false
-        automatic_release_tag: v${{ steps.extract_version.outputs.version }}
+        automatic_release_tag: v${{ env.RELEASE_VERSION }}
         files: ${{ inputs.release-files }}
       if: ${{ inputs.release-files != '' }}
 
