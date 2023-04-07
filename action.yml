@@ -45,7 +45,7 @@ runs:
       shell: bash
       run: >
         gradle build publish
-        -PmineinabyssMavenUsername=${{ inputs.maven-username }} -PmineinabyssMavenPassword=${{ inputs.maven-password }}
+        -PmineinabyssMavenUsername=${{ inputs.maven-username }} -PmineinabyssMavenPassword=${{ inputs.maven-password }} -Pplugin_path=${{ github.workspace }}/publish
 
     - name: Build with dokka
       shell: bash
