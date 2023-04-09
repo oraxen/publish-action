@@ -22,6 +22,10 @@ inputs:
   maven-password:
     description: 'The password of the repository to publish to'
     required: true
+  snapshot-branch:
+    description: 'When the workflow runs on this branch, publish to snapshots instead of releases'
+    required: false
+    default: 'develop'
 
 runs:
   using: "composite"
@@ -35,11 +39,13 @@ runs:
 
     - name: Set env variable for latest maven version
       shell: bash
-      run: >
-        echo "RELEASE_VERSION=$( \
-          curl -S -s ${{ inputs.maven-metadata-url }} | \
-          grep -oP '(?!<latest>)[\d\.]*(?=</latest>)' \
-        )" >> $GITHUB_ENV
+      run: |
+        if [ "${{ github.ref }}" = "refs/heads/${{ inputs.snapshot-branch }}" ]; then
+          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?!<latest>)[\d\.]*(?=</latest>)')-SNAPSHOT
+        else
+          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?!<latest>)[\d\.]*(?=</latest>)')
+        fi
+        echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Run gradle build and publish
       shell: bash
@@ -64,7 +70,7 @@ runs:
       uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: "${{ github.token }}"
-        prerelease: false
+        prerelease: ${{ github.ref == format('refs/heads/{0}', inputs.snapshot-branch) }}
         automatic_release_tag: v${{ env.BUMPED_VERSION }}
         files: ${{ inputs.release-files }}
       if: ${{ inputs.release-files != '' }}
