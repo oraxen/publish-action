@@ -29,6 +29,9 @@ inputs:
 
 runs:
   using: "composite"
+  env:
+    is-snapshot-branch:
+      ${{github.ref != format('refs/heads/{0}', inputs.snapshot-branch)}}
   steps:
     - name: Set up JDK
       uses: actions/setup-java@v3
@@ -56,8 +59,8 @@ runs:
     - name: Build with dokka
       shell: bash
       # jvmargs workaround for dokka builds failing on CI, see https://github.com/Kotlin/dokka/issues/1405
-      run: gradle ${{ inputs.dokka }} -Dorg.gradle.jvmargs=-XX:MaxMetaspaceSize=512m
-      if: ${{ inputs.dokka != ''}}
+      run: gradle ${{ inputs.dokka }} -Dorg
+      if: ${{ inputs.dokka  != '' && !env.is-snapshot-branch }}.gradle.jvmargs=-XX:MaxMetaspaceSize=512m
 
     - name: Get version from gradle
       shell: bash
@@ -70,7 +73,7 @@ runs:
       uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: "${{ github.token }}"
-        prerelease: ${{ github.ref == format('refs/heads/{0}', inputs.snapshot-branch) }}
+        prerelease: ${{ env.is-snapshot-branch }}
         automatic_release_tag: v${{ env.BUMPED_VERSION }}
         files: ${{ inputs.release-files }}
       if: ${{ inputs.release-files != '' }}
@@ -79,4 +82,4 @@ runs:
       uses: actions/upload-pages-artifact@v1
       with:
         path: ${{ inputs.pages-path }}
-      if: ${{ inputs.pages-path != '' }}
+      if: ${{ inputs.pages-path != '' && !env.is-snapshot-branch }}
