@@ -30,7 +30,7 @@ runs:
   using: "composite"
   steps:
     - shell: bash
-      run: echo "is-snapshot-branch=${{github.ref != format('refs/heads/{0}', inputs.snapshot-branch)}}" >> $GITHUB_ENV
+      run: echo "is-snapshot-branch=${{github.ref == format('refs/heads/{0}', inputs.snapshot-branch)}}" >> $GITHUB_ENV
 
     - name: Set up JDK
       uses: actions/setup-java@v3
@@ -42,7 +42,7 @@ runs:
     - name: Set env variable for latest maven version
       shell: bash
       run: |
-        if [ "${{ github.ref }}" = "refs/heads/${{ inputs.snapshot-branch }}" ]; then
+        if [ ${{ env.is-snapshot-branch }} = true ]; then
           VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?!<latest>)[\d\.]*(?=</latest>)')-SNAPSHOT
         else
           VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?!<latest>)[\d\.]*(?=</latest>)')
