@@ -59,7 +59,7 @@ runs:
       shell: bash
       # jvmargs workaround for dokka builds failing on CI, see https://github.com/Kotlin/dokka/issues/1405
       run: gradle ${{ inputs.dokka }}
-      if: ${{ inputs.dokka  != '' && !env.is-snapshot-branch }}
+      if: ${{ inputs.dokka  != '' && env.is-snapshot-branch == false }}
 
     - name: Get version from gradle
       shell: bash
@@ -81,4 +81,4 @@ runs:
       uses: actions/upload-pages-artifact@v1
       with:
         path: ${{ inputs.pages-path }}
-      if: ${{ inputs.pages-path != '' && !env.is-snapshot-branch }}
+      if: ${{ inputs.pages-path != '' && env.is-snapshot-branch == false }}
