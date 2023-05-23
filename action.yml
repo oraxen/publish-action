@@ -30,7 +30,7 @@ runs:
   using: "composite"
   steps:
     - shell: bash
-      run: echo "is-snapshot-branch=${{github.ref == format('refs/heads/{0}', inputs.snapshot-branch)}}" >> $GITHUB_ENV
+      run: echo "IS_SNAPSHOT=${{github.ref == format('refs/heads/{0}', inputs.snapshot-branch)}}" >> $GITHUB_ENV
 
     - name: Set up JDK
       uses: actions/setup-java@v3
@@ -54,7 +54,7 @@ runs:
     - name: Build with dokka
       shell: bash
       run: gradle ${{ inputs.dokka }}
-      if: ${{ inputs.dokka  != '' && env.is-snapshot-branch == false }}
+      if: ${{ inputs.dokka  != '' && env.IS_SNAPSHOT == false }}
 
     - name: Get version from gradle
       shell: bash
@@ -67,7 +67,7 @@ runs:
       uses: marvinpinto/action-automatic-releases@latest
       with:
         repo_token: "${{ github.token }}"
-        prerelease: ${{ env.is-snapshot-branch }}
+        prerelease: ${{ env.IS_SNAPSHOT }}
         automatic_release_tag: v${{ env.BUMPED_VERSION }}
         files: ${{ inputs.release-files }}
       if: ${{ inputs.release-files != '' }}
@@ -76,4 +76,4 @@ runs:
       uses: actions/upload-pages-artifact@v1
       with:
         path: ${{ inputs.pages-path }}
-      if: ${{ inputs.pages-path != '' && env.is-snapshot-branch == false }}
+      if: ${{ inputs.pages-path != '' && env.IS_SNAPSHOT == false }}
