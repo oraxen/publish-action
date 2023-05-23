@@ -43,9 +43,9 @@ runs:
       shell: bash
       run: |
         if [ ${{ env.is-snapshot-branch }} = true ]; then
-          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?!<latest>)[\d\.]*(?=</latest>)')-SNAPSHOT
+          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)')-SNAPSHOT
         else
-          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?!<latest>)[\d\.]*(?=</latest>)')
+          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)')
         fi
         echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
