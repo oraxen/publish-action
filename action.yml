@@ -42,11 +42,7 @@ runs:
     - name: Set env variable for latest maven version
       shell: bash
       run: |
-        if [ ${{ env.is-snapshot-branch }} = true ]; then
-          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)')-SNAPSHOT
-        else
-          VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)')
-        fi
+        VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)')
         echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Run gradle build and publish
@@ -54,6 +50,7 @@ runs:
       run: >
         gradle build publish
         -PmineinabyssMavenUsername=${{ inputs.maven-username }} -PmineinabyssMavenPassword=${{ inputs.maven-password }} -Pplugin_path=${{ github.workspace }}/publish
+        -Psnapshot=${{ env.is-snapshot-branch }}
 
     - name: Build with dokka
       shell: bash
