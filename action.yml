@@ -50,11 +50,9 @@ runs:
       run: >
         gradle build publish
         -PmineinabyssMavenUsername=${{ inputs.maven-username }} -PmineinabyssMavenPassword=${{ inputs.maven-password }} -Pplugin_path=${{ github.workspace }}/publish
-        -Psnapshot=${{ env.is-snapshot-branch }}
 
     - name: Build with dokka
       shell: bash
-      # jvmargs workaround for dokka builds failing on CI, see https://github.com/Kotlin/dokka/issues/1405
       run: gradle ${{ inputs.dokka }}
       if: ${{ inputs.dokka  != '' && env.is-snapshot-branch == false }}
 
