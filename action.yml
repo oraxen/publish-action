@@ -43,6 +43,9 @@ runs:
       shell: bash
       run: |
         VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)')
+        if [ -z "$VERSION" ]; then
+          VERSION=0
+        fi
         echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Run gradle build and publish
