@@ -1,4 +1,4 @@
-name: 'Publish MineInAbyss packages'
+name: 'Publish Oraxen packages'
 description: 'Publishes to our maven repo, documentation, and release jars'
 inputs:
   maven-metadata-url:
@@ -42,17 +42,14 @@ runs:
     - name: Set env variable for latest maven version
       shell: bash
       run: |
-        VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)')
-        if [ -z "$VERSION" ]; then
-          VERSION=0
-        fi
+        VERSION=$(curl -S -s ${{ inputs.maven-metadata-url }} 2>/dev/null | grep -oP '(?<=<latest>)(.*?)(?=<\/latest>)' || echo "0")
         echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
 
     - name: Run gradle build and publish
       shell: bash
       run: >
         gradle build publish
-        -PmineinabyssMavenUsername=${{ inputs.maven-username }} -PmineinabyssMavenPassword=${{ inputs.maven-password }} -Pplugin_path=${{ github.workspace }}/publish
+        -MAVEN_USERNAME=${{ inputs.maven-username }} -MAVEN_PASSWORD=${{ inputs.maven-password }} -Pplugin_path=${{ github.workspace }}/publish
 
     - name: Build with dokka
       shell: bash
