@@ -49,7 +49,7 @@ runs:
       shell: bash
       run: >
         gradle build publish
-        -MAVEN_USERNAME=${{ inputs.maven-username }} -MAVEN_PASSWORD=${{ inputs.maven-password }} -Pplugin_path=${{ github.workspace }}/publish
+        -PMAVEN_USERNAME=${{ inputs.maven-username }} -PMAVEN_PASSWORD=${{ inputs.maven-password }} -Pplugin_path=${{ github.workspace }}/publish
 
     - name: Build with dokka
       shell: bash
